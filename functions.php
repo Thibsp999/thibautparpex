@@ -46,16 +46,6 @@ function thibautparpex_enqueue() {
         $ver,
         true
     );
-
-    if ( is_page( 'about' ) ) {
-        wp_enqueue_script(
-            'thibautparpex-about-distortion',
-            get_template_directory_uri() . '/assets/js/about-distortion.js',
-            [],
-            $ver,
-            true
-        );
-    }
 }
 add_action( 'wp_enqueue_scripts', 'thibautparpex_enqueue' );
 
