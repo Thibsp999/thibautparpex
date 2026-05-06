@@ -1,11 +1,4 @@
-    <footer class="site-footer">
-        <a
-            href="https://www.instagram.com/thibs.p/"
-            class="footer-instagram"
-            target="_blank"
-            rel="noopener noreferrer"
-        >instagram</a>
-    </footer>
+    <footer class="site-footer"></footer>
 
 </div><!-- .site-wrapper -->
 
