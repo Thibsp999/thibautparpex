@@ -10,7 +10,7 @@
               afin que la silhouette soit lisible malgré la finesse          */
     var SHAPE_CONFIG = {
         circle: {
-            maxR: 10.0,
+            maxR: 15.0,
             draw: function ( ctx, x, y, r ) {
                 ctx.arc( x, y, r, 0, 6.2832 );
             }
