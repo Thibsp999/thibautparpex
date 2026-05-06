@@ -16,7 +16,7 @@
             }
         },
         triangle: {
-            maxR: 6.0,
+            maxR: 7.0,
             draw: function ( ctx, x, y, r ) {
                 /* Triangle équilatéral, pointe vers le haut */
                 ctx.moveTo( x,              y - r         );
@@ -32,7 +32,7 @@
             }
         },
         cross: {
-            maxR: 5.0,
+            maxR: 4.0,
             draw: function ( ctx, x, y, r ) {
                 /* Croix / plus sign — bras à 38 % du rayon total */
                 var a = r * 0.38;
