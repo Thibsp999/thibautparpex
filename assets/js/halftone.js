@@ -16,7 +16,7 @@
             }
         },
         triangle: {
-            maxR: 6.0,
+            maxR: 4.0,
             draw: function ( ctx, x, y, r ) {
                 /* Triangle équilatéral, pointe vers le haut */
                 ctx.moveTo( x,              y - r         );
@@ -26,13 +26,13 @@
             }
         },
         square: {
-            maxR: 2.0,
+            maxR: 1.8,
             draw: function ( ctx, x, y, r ) {
                 ctx.rect( x - r, y - r, r * 2, r * 2 );
             }
         },
         cross: {
-            maxR: 3.0,
+            maxR: 2.2,
             draw: function ( ctx, x, y, r ) {
                 /* Croix / plus sign — bras à 38 % du rayon total */
                 var a = r * 0.38;
@@ -191,7 +191,7 @@
     /* ── Draw ────────────────────────────────────────────────────── */
     function draw() {
         ctx.clearRect( 0, 0, W, H );
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#aaa';
 
         for ( var d = 0; d < dots.length; d++ ) {
             var dot = dots[d];
