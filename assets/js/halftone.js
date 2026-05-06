@@ -1,18 +1,16 @@
 /**
- * halftone.js — fond halftone organique interactif
- * Grille de points ultra-fins formant des blobs organiques
- * attirés par le curseur. Chaque point scintille individuellement.
+ * halftone.js — fond halftone organique
+ * La majorité des blobs se déplacent de façon totalement autonome
+ * sur des trajectoires de Lissajous. Seuls 3 suivent vaguement le curseur.
  */
 ( function () {
     'use strict';
 
     /* ── Config ──────────────────────────────────────────────── */
-    var GRID      = 13;    // espacement grille (px)
-    var MAX_R     = 1.4;   // rayon max d'un point (px)
-    var N_BLOBS   = 10;    // nombre de formes organiques
-    var BLOB_RMIN = 90;
-    var BLOB_RMAX = 230;
-    var BASE_EASE = 0.022;
+    var GRID     = 13;   // espacement grille (px)
+    var MAX_R    = 1.4;  // rayon max d'un point (px)
+    var N_FOLLOW = 3;    // blobs qui suivent le curseur (faiblement)
+    var N_WANDER = 9;    // blobs totalement autonomes
 
     /* ── State ───────────────────────────────────────────────── */
     var canvas, ctx, W, H, dots, blobs, mouse, frameId, tick;
@@ -24,7 +22,6 @@
         ctx   = canvas.getContext( '2d' );
         tick  = 0;
         mouse = { x: null, y: null };
-
         resize();
         spawnBlobs();
         bindEvents();
@@ -41,16 +38,15 @@
 
     function buildGrid() {
         dots = [];
-        var jitter = GRID * 0.65;
+        var jitter = GRID * 0.7;
         for ( var x = GRID / 2; x < W + GRID; x += GRID ) {
             for ( var y = GRID / 2; y < H + GRID; y += GRID ) {
                 dots.push( {
                     x:            x + ( Math.random() - 0.5 ) * jitter * 2,
                     y:            y + ( Math.random() - 0.5 ) * jitter * 2,
-                    /* scintillement individuel */
                     phase:        Math.random() * Math.PI * 2,
-                    flickerSpeed: 0.006 + Math.random() * 0.02,
-                    flickerAmp:   0.07 + Math.random() * 0.3,
+                    flickerSpeed: 0.005 + Math.random() * 0.025,
+                    flickerAmp:   0.1   + Math.random() * 0.38,
                 } );
             }
         }
@@ -59,28 +55,55 @@
     /* ── Blobs ───────────────────────────────────────────────── */
     function spawnBlobs() {
         blobs = [];
-        for ( var i = 0; i < N_BLOBS; i++ ) {
-            /* les 3 derniers blobs sont des "errants" : peu sensibles à la souris */
-            var wanderer = i >= N_BLOBS - 3;
+
+        /* Followers : suivent le curseur avec un easing très lent */
+        for ( var i = 0; i < N_FOLLOW; i++ ) {
             blobs.push( {
-                x:          Math.random() * W,
-                y:          Math.random() * H,
-                r:          BLOB_RMIN + Math.random() * ( BLOB_RMAX - BLOB_RMIN ),
-                rCurrent:   0,
-                ease:       wanderer
-                                ? 0.002 + Math.random() * 0.006
-                                : BASE_EASE * ( 0.35 + Math.random() * 1.1 ),
-                strength:   0.3 + Math.random() * 0.7,
-                driftAmp:   wanderer
-                                ? 200 + Math.random() * 250
-                                : 45  + Math.random() * 140,
-                driftSpeed: 0.00018 + Math.random() * 0.00055,
-                driftPhaseX: Math.random() * Math.PI * 2,
-                driftPhaseY: Math.random() * Math.PI * 2,
-                /* pulsation du rayon */
-                pulseAmp:   0.1 + Math.random() * 0.25,
-                pulseSpeed: 0.0006 + Math.random() * 0.0018,
-                pulsePhase: Math.random() * Math.PI * 2,
+                x:         Math.random() * W,
+                y:         Math.random() * H,
+                r:         110 + Math.random() * 140,
+                rCurrent:  0,
+                ease:      0.006 + Math.random() * 0.010,
+                strength:  0.35 + Math.random() * 0.5,
+                driftAmpX: 70  + Math.random() * 110,
+                driftAmpY: 60  + Math.random() * 100,
+                driftSX:   0.00018 + Math.random() * 0.00035,
+                driftSY:   0.00014 + Math.random() * 0.00028,
+                driftPX:   Math.random() * Math.PI * 2,
+                driftPY:   Math.random() * Math.PI * 2,
+                pulseAmp:  0.1  + Math.random() * 0.22,
+                pulseSpeed:0.0007 + Math.random() * 0.0016,
+                pulsePhase:Math.random() * Math.PI * 2,
+                wander:    false,
+            } );
+        }
+
+        /* Wanderers : trajectoires de Lissajous totalement autonomes */
+        for ( var j = 0; j < N_WANDER; j++ ) {
+            /* Ratios de fréquences irrationnels → trajectoires non répétitives */
+            var fx = 0.00006 + Math.random() * 0.00022;
+            var fy = fx * ( 0.38 + Math.random() * 1.7 );
+            blobs.push( {
+                x:         Math.random() * W,
+                y:         Math.random() * H,
+                r:         80 + Math.random() * 220,
+                rCurrent:  0,
+                ease:      0.0025 + Math.random() * 0.007,
+                strength:  0.2 + Math.random() * 0.65,
+                /* centre de la trajectoire (fraction du canvas) */
+                cx:        0.15 + Math.random() * 0.7,
+                cy:        0.15 + Math.random() * 0.7,
+                /* amplitude (fraction du canvas) */
+                rx:        0.18 + Math.random() * 0.42,
+                ry:        0.14 + Math.random() * 0.38,
+                freqX:     fx,
+                freqY:     fy,
+                phaseX:    Math.random() * Math.PI * 2,
+                phaseY:    Math.random() * Math.PI * 2,
+                pulseAmp:  0.08 + Math.random() * 0.32,
+                pulseSpeed:0.0004 + Math.random() * 0.002,
+                pulsePhase:Math.random() * Math.PI * 2,
+                wander:    true,
             } );
         }
     }
@@ -108,13 +131,20 @@
 
         for ( var i = 0; i < blobs.length; i++ ) {
             var b = blobs[i];
-            var ts = tick * b.driftSpeed;
-            /* dérive sur X et Y avec des phases indépendantes → trajectoire non répétitive */
-            var tx = mx + b.driftAmp * Math.sin( ts + b.driftPhaseX );
-            var ty = my + b.driftAmp * Math.cos( ts * 0.63 + b.driftPhaseY );
+
+            var tx, ty;
+            if ( b.wander ) {
+                /* Trajectoire de Lissajous indépendante du curseur */
+                tx = W * b.cx + W * b.rx * Math.sin( tick * b.freqX + b.phaseX );
+                ty = H * b.cy + H * b.ry * Math.cos( tick * b.freqY + b.phaseY );
+            } else {
+                /* Suit la souris + dérive organique propre */
+                tx = mx + b.driftAmpX * Math.sin( tick * b.driftSX + b.driftPX );
+                ty = my + b.driftAmpY * Math.cos( tick * b.driftSY + b.driftPY );
+            }
+
             b.x += ( tx - b.x ) * b.ease;
             b.y += ( ty - b.y ) * b.ease;
-            /* rayon pulsant */
             b.rCurrent = b.r * ( 1 + b.pulseAmp * Math.sin( tick * b.pulseSpeed + b.pulsePhase ) );
         }
     }
@@ -133,20 +163,19 @@
                 var dy = dot.y - bl.y;
                 var nd = Math.sqrt( dx * dx + dy * dy ) / bl.rCurrent;
                 if ( nd < 1 ) {
-                    var nt = 1 - nd;
-                    inf += nt * nt * ( 3 - 2 * nt ) * bl.strength;
+                    var t = 1 - nd;
+                    inf += t * t * ( 3 - 2 * t ) * bl.strength;
                 }
             }
 
             if ( inf < 0.03 ) continue;
             if ( inf > 1 ) inf = 1;
 
-            /* scintillement individuel du point */
             var fl = 1 - dot.flickerAmp + dot.flickerAmp * Math.sin( tick * dot.flickerSpeed + dot.phase );
             inf   *= fl;
             if ( inf < 0.03 ) continue;
 
-            ctx.globalAlpha = 0.1 + inf * 0.82;
+            ctx.globalAlpha = 0.09 + inf * 0.84;
             ctx.beginPath();
             ctx.arc( dot.x, dot.y, inf * MAX_R, 0, 6.2832 );
             ctx.fillStyle = '#fff';

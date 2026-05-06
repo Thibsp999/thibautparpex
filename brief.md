@@ -12,66 +12,102 @@ Thème WordPress portfolio personnel, nom `thibaut.parpex` (affiché tel quel da
 
 ---
 
+## Infrastructure
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Hébergement | OVH Starter — WordPress CMS préinstallé |
+| Déploiement | Git push via **Deployer for Git** |
+| Accès FTP | Oui |
+| Accès SSH | Non |
+| WP-CLI | Non disponible |
+
+> Sans SSH ni WP-CLI, toute configuration WordPress passe par des hooks PHP ou l'admin WP.
+
+---
+
 ## Design
 
 | Zone | Spec |
 |------|------|
-| Fond | Noir `#000`, canvas halftone organique interactif (points ultra-fins) |
-| Typo | **Instrument Serif** (Google Fonts) — serif contemporain, poids 400 + italique |
-| Header | `thibaut.parpex` haut gauche · nav Work / About / Contact haut droite · padding compact (`13px 48px`) |
-| Séparateur | Ligne épaisse blanche (`3px solid #fff`) entre header↔contenu et contenu↔footer |
-| Footer | Lien Instagram bas droite : <https://www.instagram.com/thibs.p/> · padding compact (`11px 48px`) |
-| Interactivité | 10 blobs organiques (dont 3 errants indépendants) — scintillement individuel par point, rayon pulsant, drift X/Y découplé |
+| Fond | Noir `#000`, canvas halftone organique (points ultra-fins) |
+| Typo | **Fraunces** (Google Fonts, variable) — poids 300/400/500, optical sizing auto |
+| Header | `thibaut.parpex` haut gauche · nav Work / About / Contact haut droite · pas de séparateur · padding `13px 48px` |
+| Footer | Instagram bas droite · pas de séparateur · padding `11px 48px` |
+| Animation | 12 blobs : 3 suivent vaguement le curseur, 9 autonomes (trajectoires Lissajous) · scintillement individuel par point · rayon pulsant |
 
 ---
 
 ## Structure des fichiers
 
 ```
-thibautparpex/              ← racine du thème (= ce repo)
-├── style.css               ← en-tête WP (Theme Name: thibaut.parpex)
-├── functions.php           ← setup · enqueue · hook d'activation (pages + menu + lecture)
-├── header.php              ← DOCTYPE, <canvas>, .site-header logo + nav
-├── footer.php              ← .site-footer Instagram, wp_footer()
-├── index.php               ← fallback template
-├── front-page.php          ← page d'accueil statique
-├── page.php                ← template générique Work / About / Contact
+thibautparpex/
+├── style.css           ← en-tête WP (Theme Name: thibaut.parpex)
+├── functions.php       ← setup · Fraunces · hook activation + fallback init
+├── header.php          ← DOCTYPE, <canvas>, header logo + nav
+├── footer.php          ← footer Instagram, wp_footer()
+├── index.php           ← fallback
+├── front-page.php      ← page d'accueil
+├── page.php            ← fallback générique
+├── page-work.php       ← articles event/art/vj + filtres JS
+├── page-about.php      ← photo (image à la une) + texte (contenu WP)
+├── page-contact.php    ← formulaire NOM/MESSAGE → sovideoevent@gmail.com
 └── assets/
-    ├── css/
-    │   └── main.css        ← tous les styles (layout, typo, responsive)
-    └── js/
-        └── halftone.js     ← animation canvas : grille + blobs + suivi souris + scintillement
+    ├── css/main.css    ← tous les styles
+    └── js/halftone.js  ← animation canvas autonome
 ```
 
 ---
 
-## Pages & configuration — automatiques à l'activation
+## Pages & setup automatique
 
-Le hook `after_switch_theme` dans `functions.php` crée automatiquement :
+Le hook `after_switch_theme` + fallback `init` (option `thibautparpex_setup_done`) créent automatiquement :
 
-| Page | Slug | Template |
-|------|------|----------|
-| Home | `/` | `front-page.php` (définie comme page statique) |
-| Work | `/work` | `page.php` |
-| About | `/about` | `page.php` |
-| Contact | `/contact` | `page.php` |
+| Page | Slug | Template auto-sélectionné |
+|------|------|--------------------------|
+| Home | `/` | `front-page.php` |
+| Work | `/work` | `page-work.php` |
+| About | `/about` | `page-about.php` |
+| Contact | `/contact` | `page-contact.php` |
 
-Il crée aussi le menu **Navigation principale** (Work / About / Contact) et configure **Réglages > Lecture** (page statique = Home).
+Crée aussi les catégories **event / art / vj**, le menu **Navigation principale**, et configure **Réglages > Lecture**.
 
-**Rien à faire manuellement** — activer le thème suffit.
+> Pour réinitialiser : supprimer l'option `thibautparpex_setup_done` via `/wp-admin/options.php`
 
 ---
 
-## Installation
+## Détail des pages
 
-1. Copier le dossier dans `wp-content/themes/`
-2. **Apparence > Thèmes** → activer `thibaut.parpex`
-3. ✅ Pages, menu et réglages lecture sont créés automatiquement
+### Work (`page-work.php`)
+- Requête WP sur les catégories `event`, `art`, `vj`
+- Grille responsive avec image à la une, titre, catégorie, date
+- 4 boutons de filtre (all / event / art / vj) — filtrage client-side JS
+- Les catégories sont auto-créées à l'activation
+
+### About (`page-about.php`)
+- Deux colonnes : photo gauche (image à la une de la page WP) + texte droite
+- Placeholder visible si pas d'image à la une définie
+- Texte : contenu de la page WP (éditable en admin) ou placeholder intégré
+
+### Contact (`page-contact.php`)
+- Deux colonnes : texte intro gauche (contenu WP) + formulaire droite
+- Champs : Nom · Message
+- Envoi via `wp_mail()` → `sovideoevent@gmail.com`
+- Sécurisé avec nonce WordPress
+- Messages de succès / erreur inline
+
+---
+
+## Déploiement
+
+1. `git push` → Deployer for Git déploie dans `wp-content/themes/thibautparpex/`
+2. **Apparence > Thèmes** → activer `thibaut.parpex` (si pas encore fait)
+3. Charger le site → setup auto au premier chargement
 
 ---
 
 ## Notes techniques
 
-- Animation configurable via les constantes en tête de `halftone.js` (`GRID`, `MAX_R`, `N_BLOBS`, etc.)
-- `page.php` minimal par choix — créer `page-work.php` etc. pour des layouts différenciés
-- Police : Instrument Serif (Google Fonts). Alternative possible : Fraunces (variable, plus contrasté)
+- Animation : `N_FOLLOW` et `N_WANDER` configurables en tête de `halftone.js`
+- Contact : nécessite que le serveur OVH ait le mail PHP configuré (cas standard OVH)
+- Pour des layouts Work différenciés par projet : créer des Page Templates nommés dans WP admin
