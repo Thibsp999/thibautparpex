@@ -26,7 +26,7 @@
             }
         },
         square: {
-            maxR: 3.0,
+            maxR: 2.0,
             draw: function ( ctx, x, y, r ) {
                 ctx.rect( x - r, y - r, r * 2, r * 2 );
             }
