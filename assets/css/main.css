@@ -1,0 +1,157 @@
+/* ============================================================
+   thibaut.parpex — main.css
+   ============================================================ */
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+html, body {
+    width: 100%;
+    min-height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: 'Playfair Display', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ── Canvas background ──────────────────────────────────────── */
+#halftone-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ── Site wrapper ───────────────────────────────────────────── */
+.site-wrapper {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 48px;
+    border-bottom: 3px solid #fff;
+}
+
+.site-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s ease;
+}
+
+.site-title:hover {
+    opacity: 0.6;
+}
+
+/* Navigation */
+.site-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 44px;
+}
+
+.site-nav a {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    transition: opacity 0.2s ease;
+}
+
+.site-nav a:hover,
+.site-nav .current-menu-item > a,
+.site-nav .current_page_item > a {
+    opacity: 0.5;
+}
+
+/* ── Main content ───────────────────────────────────────────── */
+.site-main {
+    flex: 1;
+    padding: 72px 48px;
+}
+
+.entry-title,
+.page-title {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-bottom: 32px;
+}
+
+.entry-content {
+    font-size: 1rem;
+    line-height: 1.75;
+    max-width: 720px;
+}
+
+.entry-content p + p {
+    margin-top: 1.2em;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.site-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 28px 48px;
+    border-top: 3px solid #fff;
+}
+
+.footer-instagram {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    transition: opacity 0.2s ease;
+}
+
+.footer-instagram:hover {
+    opacity: 0.5;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 24px 24px;
+    }
+
+    .site-nav ul {
+        gap: 24px;
+    }
+
+    .site-main {
+        padding: 48px 24px;
+    }
+
+    .site-footer {
+        padding: 24px 24px;
+    }
+}
