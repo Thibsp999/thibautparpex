@@ -6,6 +6,14 @@ function thibautparpex_setup() {
     add_theme_support( 'title-tag' );
     add_theme_support( 'post-thumbnails' );
     add_theme_support( 'html5', [ 'search-form', 'comment-form', 'gallery', 'caption' ] );
+    add_theme_support( 'align-wide' );
+    add_theme_support( 'responsive-embeds' );
+    add_theme_support( 'editor-styles' );
+
+    add_editor_style( [
+        'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap',
+        get_template_directory_uri() . '/assets/css/editor.css',
+    ] );
 
     register_nav_menus( [
         'primary' => __( 'Navigation principale', 'thibautparpex' ),

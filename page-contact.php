@@ -1,11 +1,10 @@
 <?php
 /**
  * Template : page Contact
- * Colonne gauche : texte intro (contenu de la page WP, sinon placeholder)
+ * Colonne gauche : contenu de la page WP (texte intro éditable en admin)
  * Colonne droite : formulaire NOM / MESSAGE → sovideoevent@gmail.com
  */
 
-/* Traitement du formulaire avant get_header() pour éviter les problèmes de headers HTTP */
 $form_sent  = false;
 $form_error = false;
 $form_msg   = '';
@@ -24,12 +23,9 @@ if (
             "Nom : {$name}\n\n{$message}",
             [ 'Content-Type: text/plain; charset=UTF-8' ]
         );
-        if ( $sent ) {
-            $form_sent = true;
-        } else {
-            $form_error = true;
-            $form_msg   = 'Une erreur est survenue. Réessayez ou contactez-moi directement.';
-        }
+        $form_sent  = $sent;
+        $form_error = ! $sent;
+        $form_msg   = $sent ? '' : 'Une erreur est survenue. Réessayez ou contactez-moi directement.';
     } else {
         $form_error = true;
         $form_msg   = 'Merci de remplir tous les champs.';
@@ -37,39 +33,33 @@ if (
 }
 
 get_header();
-the_post();
 ?>
 
 <main class="site-main">
     <div class="contact-layout">
 
-        <!-- Texte intro -->
-        <div class="contact-side">
-            <?php
-            $content = get_the_content();
-            if ( $content ) :
-                echo wp_kses_post( $content );
-            else :
-            ?>
-                <p>Vous avez un projet, une idée,<br>une collaboration en tête ?</p>
-                <p>Je suis disponible pour des performances live,<br>
-                   installations visuelles et créations sur-mesure.</p>
-                <p>— Texte à personnaliser dans WordPress › Pages › Contact</p>
+        <!-- Texte intro : éditable dans WP admin › Pages › Contact -->
+        <div class="contact-side entry-content">
+            <?php if ( have_posts() ) : the_post(); ?>
+                <?php if ( get_the_content() ) : ?>
+                    <?php the_content(); ?>
+                <?php else : ?>
+                    <p>Vous avez un projet, une idée,<br>une collaboration en tête ?</p>
+                    <p>Je suis disponible pour des performances live,<br>
+                       installations visuelles et créations sur-mesure.</p>
+                    <p style="opacity:.4;font-size:.85rem">— Remplacer via WordPress › Pages › Contact</p>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
 
         <!-- Formulaire -->
         <div>
             <?php if ( $form_sent ) : ?>
-                <p class="contact-notice contact-notice--success">
-                    Message envoyé. À bientôt.
-                </p>
+                <p class="contact-notice contact-notice--success">Message envoyé. À bientôt.</p>
             <?php else : ?>
 
                 <?php if ( $form_error ) : ?>
-                    <p class="contact-notice contact-notice--error">
-                        <?php echo esc_html( $form_msg ); ?>
-                    </p>
+                    <p class="contact-notice contact-notice--error"><?php echo esc_html( $form_msg ); ?></p>
                 <?php endif; ?>
 
                 <form class="contact-form" method="post" action="">

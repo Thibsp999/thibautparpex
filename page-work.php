@@ -1,13 +1,20 @@
 <?php
 /**
  * Template : page Work
- * Affiche les articles des catégories event / art / vj
- * avec filtrage client-side.
+ * Le contenu WP de la page s'affiche en intro optionnelle au-dessus de la grille.
+ * La grille liste les articles des catégories event / art / vj avec filtres JS.
  */
 
 get_header();
 
-/* Récupérer les IDs des catégories cibles */
+/* Intro depuis l'éditeur WP (optionnel) */
+$work_intro = '';
+if ( have_posts() ) {
+    the_post();
+    $work_intro = get_the_content();
+}
+
+/* Requête des articles work */
 $cat_slugs = [ 'event', 'art', 'vj' ];
 $cat_ids   = [];
 foreach ( $cat_slugs as $slug ) {
@@ -26,6 +33,12 @@ $work_query = new WP_Query( [
 
 <main class="site-main">
 
+    <?php if ( $work_intro ) : ?>
+        <div class="entry-content work-intro">
+            <?php echo apply_filters( 'the_content', $work_intro ); ?>
+        </div>
+    <?php endif; ?>
+
     <div class="work-filters">
         <button class="work-filter-btn is-active" data-filter="all">all</button>
         <button class="work-filter-btn" data-filter="event">event</button>
@@ -39,22 +52,18 @@ $work_query = new WP_Query( [
             <?php while ( $work_query->have_posts() ) : $work_query->the_post(); ?>
 
                 <?php
-                /* Catégories du post en slugs, pour le filtre JS */
                 $post_cats = get_the_category();
                 $cat_list  = implode( ' ', array_map( fn( $c ) => esc_attr( $c->slug ), $post_cats ) );
                 ?>
 
                 <article class="work-item" data-cats="<?php echo $cat_list; ?>">
                     <a href="<?php the_permalink(); ?>">
-
                         <div class="work-item-thumb">
                             <?php if ( has_post_thumbnail() ) : ?>
                                 <?php the_post_thumbnail( 'medium_large' ); ?>
                             <?php endif; ?>
                         </div>
-
                         <h2 class="work-item-title"><?php the_title(); ?></h2>
-
                         <p class="work-item-meta">
                             <?php echo esc_html( implode( ' · ', array_map( fn( $c ) => $c->name, $post_cats ) ) ); ?>
                             &nbsp;—&nbsp;
@@ -62,7 +71,6 @@ $work_query = new WP_Query( [
                                 <?php echo get_the_date( 'M Y' ); ?>
                             </time>
                         </p>
-
                     </a>
                 </article>
 
@@ -79,7 +87,6 @@ $work_query = new WP_Query( [
 ( function () {
     var btns  = document.querySelectorAll( '.work-filter-btn' );
     var items = document.querySelectorAll( '.work-item' );
-
     btns.forEach( function ( btn ) {
         btn.addEventListener( 'click', function () {
             var filter = this.dataset.filter;
@@ -87,9 +94,7 @@ $work_query = new WP_Query( [
             this.classList.add( 'is-active' );
             items.forEach( function ( item ) {
                 var cats = item.dataset.cats.split( ' ' );
-                item.style.display = ( filter === 'all' || cats.indexOf( filter ) !== -1 )
-                    ? ''
-                    : 'none';
+                item.style.display = ( filter === 'all' || cats.indexOf( filter ) !== -1 ) ? '' : 'none';
             } );
         } );
     } );

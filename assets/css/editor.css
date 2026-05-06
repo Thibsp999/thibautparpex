@@ -1,0 +1,43 @@
+/* Éditeur WordPress — fond sombre pour matcher le frontend */
+
+.editor-styles-wrapper {
+    background-color: #000 !important;
+    color: #fff;
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+.editor-styles-wrapper p,
+.editor-styles-wrapper li,
+.editor-styles-wrapper td,
+.editor-styles-wrapper figcaption {
+    color: #fff;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4,
+.editor-styles-wrapper h5,
+.editor-styles-wrapper h6 {
+    color: #fff;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+}
+
+.editor-styles-wrapper a { color: #fff; }
+
+/* Block editor : blocs courants */
+.editor-styles-wrapper .wp-block-media-text__media img,
+.editor-styles-wrapper .wp-block-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.editor-styles-wrapper .wp-block-separator {
+    border-color: rgba(255, 255, 255, 0.2);
+}
