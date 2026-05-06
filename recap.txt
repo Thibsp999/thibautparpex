@@ -1,0 +1,146 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  THIBAUT.PARPEX — Récap du thème WordPress
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+──────────────────────────────────────────
+  INFRASTRUCTURE
+──────────────────────────────────────────
+
+Hébergement   : OVH Starter (WordPress préinstallé)
+Déploiement   : Git push via Deployer for Git
+Accès         : FTP oui / SSH non / WP-CLI non
+Repo          : github.com/Thibsp999/thibautparpex
+               (= racine du dossier wp-content/themes/thibautparpex/)
+
+
+──────────────────────────────────────────
+  CE QUI A ÉTÉ FAIT
+──────────────────────────────────────────
+
+- Thème WordPress custom nommé "thibaut.parpex"
+- Header : logo "thibaut.parpex" gauche + nav Work/About/Contact droite
+- Footer : vide (Instagram retiré)
+- Fond interactif : animation halftone canvas (points organiques)
+  · Formes différentes selon la page (cercle / triangle / carré / croix)
+  · 9 blobs autonomes (trajectoires Lissajous) + 3 qui suivent vaguement la souris
+- 4 pages créées automatiquement à l'activation du thème :
+  · Home     → front-page.php
+  · Work     → page-work.php  (grille articles avec filtres event/art/vj)
+  · About    → page-about.php (100% Gutenberg)
+  · Contact  → page-contact.php (100% Gutenberg, prévu pour Contact Form 7)
+- Catégories event / art / vj créées automatiquement
+- Menu "Navigation principale" créé et assigné automatiquement
+- Réglages Lecture configurés automatiquement (page statique = Home)
+- Support Gutenberg complet (align-wide, colonnes, médias & texte, etc.)
+- Éditeur WP en mode sombre (fond noir + Fraunces)
+- Fichier customs_form.txt : configuration de style WPForms prête à importer
+
+
+──────────────────────────────────────────
+  STRUCTURE DES FICHIERS
+──────────────────────────────────────────
+
+thibautparpex/
+├── style.css              Déclaration du thème WP
+├── functions.php          Setup, assets, setup automatique
+├── header.php             Header + canvas halftone
+├── footer.php             Footer (vide)
+├── index.php              Fallback template
+├── front-page.php         Page d'accueil
+├── page.php               Template générique (fallback pages)
+├── page-work.php          Page Work
+├── page-about.php         Page About
+├── page-contact.php       Page Contact
+├── brief.md               Brief projet (mise à jour au fil des sessions)
+├── recap.txt              Ce fichier
+├── customs_form.txt       Style WPForms à importer
+└── assets/
+    ├── css/
+    │   ├── main.css       Tous les styles du thème
+    │   └── editor.css     Styles de l'éditeur WP (fond sombre)
+    └── js/
+        └── halftone.js    Animation canvas
+
+
+──────────────────────────────────────────
+  OÙ MODIFIER LES VARIABLES
+──────────────────────────────────────────
+
+▸ POLICE DU SITE
+  Fichier : functions.php — ligne ~20
+  Variable : URL Google Fonts (family=Fraunces...)
+  Fichier : assets/css/main.css — chercher "font-family"
+  Fichier : assets/css/editor.css — chercher "font-family"
+  → Remplacer 'Fraunces' par une autre Google Font partout
+
+▸ TAILLE DE LA POLICE
+  Fichier : assets/css/main.css
+  .site-title          → taille du logo dans le header
+  .site-nav a          → taille des liens de navigation
+  .footer-instagram    → taille du lien footer (si réactivé)
+  .entry-content       → taille du texte des pages
+  .work-item-title     → taille des titres dans la grille Work
+
+▸ TAILLE DES POINTS (halftone)
+  Fichier : assets/js/halftone.js — lignes ~12 à ~50
+  SHAPE_CONFIG = {
+    circle   → maxR: 1.9   (page Home)
+    triangle → maxR: 2.8   (page Work)
+    square   → maxR: 2.3   (page About)
+    cross    → maxR: 3.0   (page Contact)
+  }
+  → Augmenter/diminuer la valeur maxR de chaque forme
+
+▸ ESPACEMENT DE LA GRILLE DE POINTS
+  Fichier : assets/js/halftone.js — ligne ~54
+  var GRID = 13;
+  → Plus petit = grille plus dense (plus de points)
+  → Plus grand = grille plus aérée (moins de points)
+
+▸ NOMBRE DE BLOBS (formes organiques)
+  Fichier : assets/js/halftone.js — lignes ~57-58
+  var N_FOLLOW = 3;   → blobs qui suivent vaguement la souris
+  var N_WANDER = 9;   → blobs autonomes (trajectoires Lissajous)
+
+▸ VITESSE DE SUIVI DE LA SOURIS
+  Fichier : assets/js/halftone.js — dans spawnBlobs(), blocs "Followers"
+  ease: 0.006 + Math.random() * 0.010
+  → Augmenter les valeurs pour un suivi plus réactif
+  → Diminuer pour un suivi encore plus lent/absent
+
+▸ COULEURS
+  Fichier : assets/css/main.css — lignes ~13-22
+  background: #000    → fond de la page
+  color: #fff         → couleur du texte
+  Les points halftone sont toujours blancs (#fff dans halftone.js)
+
+▸ PADDING HEADER / FOOTER
+  Fichier : assets/css/main.css
+  .site-header → padding: 13px 48px
+  .site-footer → padding: 11px 48px
+
+▸ FORME PAR PAGE
+  Fichier : page-work.php    → ligne 8 : $GLOBALS['halftone_shape'] = 'triangle'
+  Fichier : page-about.php   → ligne 8 : $GLOBALS['halftone_shape'] = 'square'
+  Fichier : page-contact.php → ligne 8 : $GLOBALS['halftone_shape'] = 'cross'
+  Fichier : header.php       → lit la valeur via data-shape sur le canvas
+  Valeurs disponibles : circle · triangle · square · cross
+
+▸ STYLE DU FORMULAIRE WPFORMS
+  Fichier : customs_form.txt
+  → Importer via WPForms admin → Style & Prévisualisation → Importer
+  → Le CSS personnalisé se trouve à la fin du JSON, champ "customCss"
+
+
+──────────────────────────────────────────
+  RÉINITIALISER LE SETUP AUTOMATIQUE
+──────────────────────────────────────────
+
+Si les pages/menu/catégories doivent être recréés :
+1. Aller sur /wp-admin/options.php
+2. Trouver l'option "thibautparpex_setup_done"
+3. La supprimer ou vider sa valeur
+4. Recharger le site → le setup retourne automatiquement
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
