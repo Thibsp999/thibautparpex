@@ -10,13 +10,13 @@
               afin que la silhouette soit lisible malgré la finesse          */
     var SHAPE_CONFIG = {
         circle: {
-            maxR: 3.9,
+            maxR: 5.0,
             draw: function ( ctx, x, y, r ) {
                 ctx.arc( x, y, r, 0, 6.2832 );
             }
         },
         triangle: {
-            maxR: 4.4,
+            maxR: 6.0,
             draw: function ( ctx, x, y, r ) {
                 /* Triangle équilatéral, pointe vers le haut */
                 ctx.moveTo( x,              y - r         );
@@ -26,13 +26,13 @@
             }
         },
         square: {
-            maxR: 4.1,
+            maxR: 4.0,
             draw: function ( ctx, x, y, r ) {
                 ctx.rect( x - r, y - r, r * 2, r * 2 );
             }
         },
         cross: {
-            maxR: 6.0,
+            maxR: 5.0,
             draw: function ( ctx, x, y, r ) {
                 /* Croix / plus sign — bras à 38 % du rayon total */
                 var a = r * 0.38;
