@@ -33,6 +33,8 @@ $work_query = new WP_Query( [
 
 <main class="site-main">
 
+    <h1 class="page-title"><?php echo get_the_title( get_queried_object_id() ); ?></h1>
+
     <?php if ( $work_intro ) : ?>
         <div class="entry-content work-intro">
             <?php echo apply_filters( 'the_content', $work_intro ); ?>
