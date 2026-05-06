@@ -1,18 +1,18 @@
 /**
  * halftone.js — fond halftone organique interactif
- * Grille de points ultra-fins formant des formes organiques
- * attirées par le curseur de la souris.
+ * Grille de points ultra-fins formant des blobs organiques
+ * attirés par le curseur. Chaque point scintille individuellement.
  */
 ( function () {
     'use strict';
 
     /* ── Config ──────────────────────────────────────────────── */
-    var GRID      = 13;   // espacement de la grille (px)
-    var MAX_R     = 1.4;  // rayon max d'un point (px)
-    var N_BLOBS   = 7;    // nombre de formes organiques
-    var BLOB_RMIN = 100;  // rayon d'influence min d'un blob
-    var BLOB_RMAX = 200;  // rayon d'influence max
-    var BASE_EASE = 0.022; // vitesse de suivi du curseur
+    var GRID      = 13;    // espacement grille (px)
+    var MAX_R     = 1.4;   // rayon max d'un point (px)
+    var N_BLOBS   = 10;    // nombre de formes organiques
+    var BLOB_RMIN = 90;
+    var BLOB_RMAX = 230;
+    var BASE_EASE = 0.022;
 
     /* ── State ───────────────────────────────────────────────── */
     var canvas, ctx, W, H, dots, blobs, mouse, frameId, tick;
@@ -21,14 +21,13 @@
     function init() {
         canvas = document.getElementById( 'halftone-canvas' );
         if ( ! canvas ) return;
-        ctx    = canvas.getContext( '2d' );
-        tick   = 0;
-        mouse  = { x: null, y: null };
+        ctx   = canvas.getContext( '2d' );
+        tick  = 0;
+        mouse = { x: null, y: null };
 
         resize();
         spawnBlobs();
         bindEvents();
-
         if ( frameId ) cancelAnimationFrame( frameId );
         loop();
     }
@@ -42,12 +41,16 @@
 
     function buildGrid() {
         dots = [];
-        var jitter = GRID * 0.35;
+        var jitter = GRID * 0.65;
         for ( var x = GRID / 2; x < W + GRID; x += GRID ) {
             for ( var y = GRID / 2; y < H + GRID; y += GRID ) {
                 dots.push( {
-                    x: x + ( Math.random() - 0.5 ) * jitter * 2,
-                    y: y + ( Math.random() - 0.5 ) * jitter * 2,
+                    x:            x + ( Math.random() - 0.5 ) * jitter * 2,
+                    y:            y + ( Math.random() - 0.5 ) * jitter * 2,
+                    /* scintillement individuel */
+                    phase:        Math.random() * Math.PI * 2,
+                    flickerSpeed: 0.006 + Math.random() * 0.02,
+                    flickerAmp:   0.07 + Math.random() * 0.3,
                 } );
             }
         }
@@ -57,15 +60,27 @@
     function spawnBlobs() {
         blobs = [];
         for ( var i = 0; i < N_BLOBS; i++ ) {
+            /* les 3 derniers blobs sont des "errants" : peu sensibles à la souris */
+            var wanderer = i >= N_BLOBS - 3;
             blobs.push( {
                 x:          Math.random() * W,
                 y:          Math.random() * H,
                 r:          BLOB_RMIN + Math.random() * ( BLOB_RMAX - BLOB_RMIN ),
-                ease:       BASE_EASE * ( 0.45 + Math.random() * 0.9 ),
-                strength:   0.45 + Math.random() * 0.55,
-                driftAmp:   60 + Math.random() * 100,
-                driftSpeed: 0.00025 + Math.random() * 0.00035,
-                driftPhase: Math.random() * Math.PI * 2,
+                rCurrent:   0,
+                ease:       wanderer
+                                ? 0.002 + Math.random() * 0.006
+                                : BASE_EASE * ( 0.35 + Math.random() * 1.1 ),
+                strength:   0.3 + Math.random() * 0.7,
+                driftAmp:   wanderer
+                                ? 200 + Math.random() * 250
+                                : 45  + Math.random() * 140,
+                driftSpeed: 0.00018 + Math.random() * 0.00055,
+                driftPhaseX: Math.random() * Math.PI * 2,
+                driftPhaseY: Math.random() * Math.PI * 2,
+                /* pulsation du rayon */
+                pulseAmp:   0.1 + Math.random() * 0.25,
+                pulseSpeed: 0.0006 + Math.random() * 0.0018,
+                pulsePhase: Math.random() * Math.PI * 2,
             } );
         }
     }
@@ -73,12 +88,10 @@
     /* ── Events ──────────────────────────────────────────────── */
     function bindEvents() {
         window.addEventListener( 'resize', resize );
-
         window.addEventListener( 'mousemove', function ( e ) {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
         } );
-
         window.addEventListener( 'touchmove', function ( e ) {
             if ( e.touches.length ) {
                 mouse.x = e.touches[0].clientX;
@@ -94,13 +107,15 @@
         var my = ( mouse.y !== null ) ? mouse.y : H * 0.5;
 
         for ( var i = 0; i < blobs.length; i++ ) {
-            var b  = blobs[i];
-            var t  = tick * b.driftSpeed + b.driftPhase;
-            /* chaque blob suit la souris + une dérive organique individuelle */
-            var tx = mx + b.driftAmp * Math.sin( t );
-            var ty = my + b.driftAmp * Math.cos( t * 0.71 );
+            var b = blobs[i];
+            var ts = tick * b.driftSpeed;
+            /* dérive sur X et Y avec des phases indépendantes → trajectoire non répétitive */
+            var tx = mx + b.driftAmp * Math.sin( ts + b.driftPhaseX );
+            var ty = my + b.driftAmp * Math.cos( ts * 0.63 + b.driftPhaseY );
             b.x += ( tx - b.x ) * b.ease;
             b.y += ( ty - b.y ) * b.ease;
+            /* rayon pulsant */
+            b.rCurrent = b.r * ( 1 + b.pulseAmp * Math.sin( tick * b.pulseSpeed + b.pulsePhase ) );
         }
     }
 
@@ -109,31 +124,31 @@
         ctx.clearRect( 0, 0, W, H );
 
         for ( var d = 0; d < dots.length; d++ ) {
-            var dot  = dots[d];
-            var inf  = 0;
+            var dot = dots[d];
+            var inf = 0;
 
             for ( var b = 0; b < blobs.length; b++ ) {
                 var bl = blobs[b];
                 var dx = dot.x - bl.x;
                 var dy = dot.y - bl.y;
-                /* distance normalisée [0-1] */
-                var nd = Math.sqrt( dx * dx + dy * dy ) / bl.r;
+                var nd = Math.sqrt( dx * dx + dy * dy ) / bl.rCurrent;
                 if ( nd < 1 ) {
-                    /* falloff doux (courbe cubique) pour des bords organiques */
-                    var t = 1 - nd;
-                    inf += t * t * ( 3 - 2 * t ) * bl.strength;
+                    var nt = 1 - nd;
+                    inf += nt * nt * ( 3 - 2 * nt ) * bl.strength;
                 }
             }
 
             if ( inf < 0.03 ) continue;
-            inf = inf > 1 ? 1 : inf;
+            if ( inf > 1 ) inf = 1;
 
-            var r     = inf * MAX_R;
-            var alpha = 0.12 + inf * 0.78;
+            /* scintillement individuel du point */
+            var fl = 1 - dot.flickerAmp + dot.flickerAmp * Math.sin( tick * dot.flickerSpeed + dot.phase );
+            inf   *= fl;
+            if ( inf < 0.03 ) continue;
 
-            ctx.globalAlpha = alpha;
+            ctx.globalAlpha = 0.1 + inf * 0.82;
             ctx.beginPath();
-            ctx.arc( dot.x, dot.y, r, 0, 6.2832 );
+            ctx.arc( dot.x, dot.y, inf * MAX_R, 0, 6.2832 );
             ctx.fillStyle = '#fff';
             ctx.fill();
         }

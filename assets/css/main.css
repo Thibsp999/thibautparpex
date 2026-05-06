@@ -15,7 +15,7 @@ html, body {
     min-height: 100%;
     background: #000;
     color: #fff;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Instrument Serif', Georgia, serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
 }
@@ -50,34 +50,34 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 30px 48px;
+    padding: 13px 48px;
     border-bottom: 3px solid #fff;
 }
 
 .site-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.25rem;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 1.15rem;
     font-weight: 400;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     transition: opacity 0.2s ease;
 }
 
 .site-title:hover {
-    opacity: 0.6;
+    opacity: 0.55;
 }
 
 /* Navigation */
 .site-nav ul {
     list-style: none;
     display: flex;
-    gap: 44px;
+    gap: 40px;
 }
 
 .site-nav a {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 0.9rem;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 0.95rem;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: lowercase;
     transition: opacity 0.2s ease;
 }
@@ -85,7 +85,7 @@ a {
 .site-nav a:hover,
 .site-nav .current-menu-item > a,
 .site-nav .current_page_item > a {
-    opacity: 0.5;
+    opacity: 0.45;
 }
 
 /* ── Main content ───────────────────────────────────────────── */
@@ -96,7 +96,8 @@ a {
 
 .entry-title,
 .page-title {
-    font-size: 2rem;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 2.2rem;
     font-weight: 400;
     letter-spacing: 0.01em;
     margin-bottom: 32px;
@@ -117,21 +118,21 @@ a {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 28px 48px;
+    padding: 11px 48px;
     border-top: 3px solid #fff;
 }
 
 .footer-instagram {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 0.85rem;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 0.9rem;
     font-weight: 400;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: lowercase;
     transition: opacity 0.2s ease;
 }
 
 .footer-instagram:hover {
-    opacity: 0.5;
+    opacity: 0.45;
 }
 
 /* ── Responsive ─────────────────────────────────────────────── */
@@ -139,12 +140,12 @@ a {
     .site-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 20px;
-        padding: 24px 24px;
+        gap: 14px;
+        padding: 12px 24px;
     }
 
     .site-nav ul {
-        gap: 24px;
+        gap: 22px;
     }
 
     .site-main {
@@ -152,6 +153,6 @@ a {
     }
 
     .site-footer {
-        padding: 24px 24px;
+        padding: 10px 24px;
     }
 }
