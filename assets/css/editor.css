@@ -3,8 +3,7 @@
 .editor-styles-wrapper {
     background-color: #000 !important;
     color: #fff;
-    font-family: 'Fraunces', Georgia, serif;
-    font-optical-sizing: auto;
+    font-family: 'Open Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -13,7 +12,7 @@
 .editor-styles-wrapper td,
 .editor-styles-wrapper figcaption {
     color: #fff;
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Open Sans', sans-serif;
     font-size: 1rem;
     line-height: 1.75;
 }
@@ -25,7 +24,7 @@
 .editor-styles-wrapper h5,
 .editor-styles-wrapper h6 {
     color: #fff;
-    font-family: 'Fraunces', Georgia, serif;
+    font-family: 'Open Sans', sans-serif;
     font-weight: 400;
 }
 

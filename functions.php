@@ -11,7 +11,7 @@ function thibautparpex_setup() {
     add_theme_support( 'editor-styles' );
 
     add_editor_style( [
-        'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap',
+        'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap',
         get_template_directory_uri() . '/assets/css/editor.css',
     ] );
 
@@ -26,8 +26,8 @@ function thibautparpex_enqueue() {
     $ver = wp_get_theme()->get( 'Version' );
 
     wp_enqueue_style(
-        'fraunces',
-        'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap',
+        'open-sans',
+        'https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap',
         [],
         null
     );
@@ -35,7 +35,7 @@ function thibautparpex_enqueue() {
     wp_enqueue_style(
         'thibautparpex-main',
         get_template_directory_uri() . '/assets/css/main.css',
-        [ 'fraunces' ],
+        [ 'open-sans' ],
         $ver
     );
 
