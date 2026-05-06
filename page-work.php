@@ -5,7 +5,9 @@
  * La grille liste les articles des catégories event / art / vj avec filtres JS.
  */
 
-get_header();
+<?php $GLOBALS['halftone_shape'] = 'triangle'; ?>
+<?php get_header(); ?>
+<?php
 
 /* Intro depuis l'éditeur WP (optionnel) */
 $work_intro = '';

@@ -1,27 +1,81 @@
 /**
- * halftone.js — fond halftone organique
- * La majorité des blobs se déplacent de façon totalement autonome
- * sur des trajectoires de Lissajous. Seuls 3 suivent vaguement le curseur.
+ * halftone.js — fond halftone organique avec variantes de formes par page
+ * circle (home) · triangle (work) · square (about) · cross (contact)
  */
 ( function () {
     'use strict';
 
-    /* ── Config ──────────────────────────────────────────────── */
-    var GRID     = 13;   // espacement grille (px)
-    var MAX_R    = 1.4;  // rayon max d'un point (px)
-    var N_FOLLOW = 3;    // blobs qui suivent le curseur (faiblement)
-    var N_WANDER = 9;    // blobs totalement autonomes
+    /* ── Config par forme ────────────────────────────────────────
+       maxR : rayon max du point (px) — plus grand pour les formes géométriques
+              afin que la silhouette soit lisible malgré la finesse          */
+    var SHAPE_CONFIG = {
+        circle: {
+            maxR: 1.4,
+            draw: function ( ctx, x, y, r ) {
+                ctx.arc( x, y, r, 0, 6.2832 );
+            }
+        },
+        triangle: {
+            maxR: 2.2,
+            draw: function ( ctx, x, y, r ) {
+                /* Triangle équilatéral, pointe vers le haut */
+                ctx.moveTo( x,              y - r         );
+                ctx.lineTo( x + r * 0.866,  y + r * 0.5  );
+                ctx.lineTo( x - r * 0.866,  y + r * 0.5  );
+                ctx.closePath();
+            }
+        },
+        square: {
+            maxR: 1.8,
+            draw: function ( ctx, x, y, r ) {
+                ctx.rect( x - r, y - r, r * 2, r * 2 );
+            }
+        },
+        cross: {
+            maxR: 2.4,
+            draw: function ( ctx, x, y, r ) {
+                /* Croix / plus sign — bras à 38 % du rayon total */
+                var a = r * 0.38;
+                ctx.moveTo( x - a, y - r );
+                ctx.lineTo( x + a, y - r );
+                ctx.lineTo( x + a, y - a );
+                ctx.lineTo( x + r, y - a );
+                ctx.lineTo( x + r, y + a );
+                ctx.lineTo( x + a, y + a );
+                ctx.lineTo( x + a, y + r );
+                ctx.lineTo( x - a, y + r );
+                ctx.lineTo( x - a, y + a );
+                ctx.lineTo( x - r, y + a );
+                ctx.lineTo( x - r, y - a );
+                ctx.lineTo( x - a, y - a );
+                ctx.closePath();
+            }
+        }
+    };
 
-    /* ── State ───────────────────────────────────────────────── */
+    /* ── Params animation ────────────────────────────────────────── */
+    var GRID     = 13;
+    var N_FOLLOW = 3;
+    var N_WANDER = 9;
+
+    /* ── State ───────────────────────────────────────────────────── */
     var canvas, ctx, W, H, dots, blobs, mouse, frameId, tick;
+    var MAX_R, drawDot;
 
-    /* ── Init ────────────────────────────────────────────────── */
+    /* ── Init ────────────────────────────────────────────────────── */
     function init() {
         canvas = document.getElementById( 'halftone-canvas' );
         if ( ! canvas ) return;
         ctx   = canvas.getContext( '2d' );
         tick  = 0;
         mouse = { x: null, y: null };
+
+        /* Sélection de la forme via data-shape posé par le template PHP */
+        var shapeName = canvas.dataset.shape || 'circle';
+        var shape     = SHAPE_CONFIG[ shapeName ] || SHAPE_CONFIG.circle;
+        MAX_R   = shape.maxR;
+        drawDot = shape.draw;
+
         resize();
         spawnBlobs();
         bindEvents();
@@ -29,7 +83,7 @@
         loop();
     }
 
-    /* ── Grid ────────────────────────────────────────────────── */
+    /* ── Grid ────────────────────────────────────────────────────── */
     function resize() {
         W = canvas.width  = window.innerWidth;
         H = canvas.height = window.innerHeight;
@@ -52,68 +106,57 @@
         }
     }
 
-    /* ── Blobs ───────────────────────────────────────────────── */
+    /* ── Blobs ───────────────────────────────────────────────────── */
     function spawnBlobs() {
         blobs = [];
 
-        /* Followers : suivent le curseur avec un easing très lent */
         for ( var i = 0; i < N_FOLLOW; i++ ) {
             blobs.push( {
-                x:         Math.random() * W,
-                y:         Math.random() * H,
-                r:         110 + Math.random() * 140,
-                rCurrent:  0,
+                x: Math.random() * W, y: Math.random() * H,
+                r: 110 + Math.random() * 140, rCurrent: 0,
                 ease:      0.006 + Math.random() * 0.010,
-                strength:  0.35 + Math.random() * 0.5,
-                driftAmpX: 70  + Math.random() * 110,
-                driftAmpY: 60  + Math.random() * 100,
+                strength:  0.35  + Math.random() * 0.5,
+                driftAmpX: 70    + Math.random() * 110,
+                driftAmpY: 60    + Math.random() * 100,
                 driftSX:   0.00018 + Math.random() * 0.00035,
                 driftSY:   0.00014 + Math.random() * 0.00028,
                 driftPX:   Math.random() * Math.PI * 2,
                 driftPY:   Math.random() * Math.PI * 2,
-                pulseAmp:  0.1  + Math.random() * 0.22,
+                pulseAmp:  0.1   + Math.random() * 0.22,
                 pulseSpeed:0.0007 + Math.random() * 0.0016,
                 pulsePhase:Math.random() * Math.PI * 2,
-                wander:    false,
+                wander: false,
             } );
         }
 
-        /* Wanderers : trajectoires de Lissajous totalement autonomes */
         for ( var j = 0; j < N_WANDER; j++ ) {
-            /* Ratios de fréquences irrationnels → trajectoires non répétitives */
             var fx = 0.00006 + Math.random() * 0.00022;
             var fy = fx * ( 0.38 + Math.random() * 1.7 );
             blobs.push( {
-                x:         Math.random() * W,
-                y:         Math.random() * H,
-                r:         80 + Math.random() * 220,
-                rCurrent:  0,
+                x: Math.random() * W, y: Math.random() * H,
+                r: 80 + Math.random() * 220, rCurrent: 0,
                 ease:      0.0025 + Math.random() * 0.007,
-                strength:  0.2 + Math.random() * 0.65,
-                /* centre de la trajectoire (fraction du canvas) */
-                cx:        0.15 + Math.random() * 0.7,
-                cy:        0.15 + Math.random() * 0.7,
-                /* amplitude (fraction du canvas) */
-                rx:        0.18 + Math.random() * 0.42,
-                ry:        0.14 + Math.random() * 0.38,
-                freqX:     fx,
-                freqY:     fy,
-                phaseX:    Math.random() * Math.PI * 2,
-                phaseY:    Math.random() * Math.PI * 2,
+                strength:  0.2    + Math.random() * 0.65,
+                cx: 0.15 + Math.random() * 0.7,
+                cy: 0.15 + Math.random() * 0.7,
+                rx: 0.18 + Math.random() * 0.42,
+                ry: 0.14 + Math.random() * 0.38,
+                freqX: fx, freqY: fy,
+                phaseX: Math.random() * Math.PI * 2,
+                phaseY: Math.random() * Math.PI * 2,
                 pulseAmp:  0.08 + Math.random() * 0.32,
                 pulseSpeed:0.0004 + Math.random() * 0.002,
                 pulsePhase:Math.random() * Math.PI * 2,
-                wander:    true,
+                wander: true,
             } );
         }
     }
 
-    /* ── Events ──────────────────────────────────────────────── */
+    /* ── Events ──────────────────────────────────────────────────── */
     function bindEvents() {
         window.addEventListener( 'resize', resize );
         window.addEventListener( 'mousemove', function ( e ) {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+            mouse.x = e.clientX; mouse.y = e.clientY;
         } );
         window.addEventListener( 'touchmove', function ( e ) {
             if ( e.touches.length ) {
@@ -123,7 +166,7 @@
         }, { passive: true } );
     }
 
-    /* ── Update ──────────────────────────────────────────────── */
+    /* ── Update ──────────────────────────────────────────────────── */
     function update() {
         tick++;
         var mx = ( mouse.x !== null ) ? mouse.x : W * 0.5;
@@ -131,27 +174,24 @@
 
         for ( var i = 0; i < blobs.length; i++ ) {
             var b = blobs[i];
-
             var tx, ty;
             if ( b.wander ) {
-                /* Trajectoire de Lissajous indépendante du curseur */
                 tx = W * b.cx + W * b.rx * Math.sin( tick * b.freqX + b.phaseX );
                 ty = H * b.cy + H * b.ry * Math.cos( tick * b.freqY + b.phaseY );
             } else {
-                /* Suit la souris + dérive organique propre */
                 tx = mx + b.driftAmpX * Math.sin( tick * b.driftSX + b.driftPX );
                 ty = my + b.driftAmpY * Math.cos( tick * b.driftSY + b.driftPY );
             }
-
             b.x += ( tx - b.x ) * b.ease;
             b.y += ( ty - b.y ) * b.ease;
             b.rCurrent = b.r * ( 1 + b.pulseAmp * Math.sin( tick * b.pulseSpeed + b.pulsePhase ) );
         }
     }
 
-    /* ── Draw ────────────────────────────────────────────────── */
+    /* ── Draw ────────────────────────────────────────────────────── */
     function draw() {
         ctx.clearRect( 0, 0, W, H );
+        ctx.fillStyle = '#fff';
 
         for ( var d = 0; d < dots.length; d++ ) {
             var dot = dots[d];
@@ -172,27 +212,26 @@
             if ( inf > 1 ) inf = 1;
 
             var fl = 1 - dot.flickerAmp + dot.flickerAmp * Math.sin( tick * dot.flickerSpeed + dot.phase );
-            inf   *= fl;
+            inf *= fl;
             if ( inf < 0.03 ) continue;
 
             ctx.globalAlpha = 0.09 + inf * 0.84;
             ctx.beginPath();
-            ctx.arc( dot.x, dot.y, inf * MAX_R, 0, 6.2832 );
-            ctx.fillStyle = '#fff';
+            drawDot( ctx, dot.x, dot.y, inf * MAX_R );
             ctx.fill();
         }
 
         ctx.globalAlpha = 1;
     }
 
-    /* ── Loop ────────────────────────────────────────────────── */
+    /* ── Loop ────────────────────────────────────────────────────── */
     function loop() {
         frameId = requestAnimationFrame( loop );
         update();
         draw();
     }
 
-    /* ── Boot ────────────────────────────────────────────────── */
+    /* ── Boot ────────────────────────────────────────────────────── */
     if ( document.readyState === 'loading' ) {
         document.addEventListener( 'DOMContentLoaded', init );
     } else {

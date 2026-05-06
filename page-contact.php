@@ -5,7 +5,8 @@
  * Utiliser un bloc de formulaire (ex. Contact Form 7) pour le form de contact.
  */
 
-get_header();
+<?php $GLOBALS['halftone_shape'] = 'cross'; ?>
+<?php get_header(); ?>
 ?>
 
 <main class="site-main">

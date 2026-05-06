@@ -5,7 +5,8 @@
  * Utiliser le bloc "Médias et texte" ou "Colonnes" pour photo + bio.
  */
 
-get_header();
+<?php $GLOBALS['halftone_shape'] = 'square'; ?>
+<?php get_header(); ?>
 ?>
 
 <main class="site-main">

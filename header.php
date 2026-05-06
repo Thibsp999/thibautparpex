@@ -8,7 +8,7 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<canvas id="halftone-canvas" aria-hidden="true"></canvas>
+<canvas id="halftone-canvas" data-shape="<?php echo esc_attr( $GLOBALS['halftone_shape'] ?? 'circle' ); ?>" aria-hidden="true"></canvas>
 
 <div class="site-wrapper">
 
