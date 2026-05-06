@@ -10,7 +10,7 @@
               afin que la silhouette soit lisible malgré la finesse          */
     var SHAPE_CONFIG = {
         circle: {
-            maxR: 6.0,
+            maxR: 10.0,
             draw: function ( ctx, x, y, r ) {
                 ctx.arc( x, y, r, 0, 6.2832 );
             }
@@ -191,7 +191,7 @@
     /* ── Draw ────────────────────────────────────────────────────── */
     function draw() {
         ctx.clearRect( 0, 0, W, H );
-        ctx.fillStyle = '#aaa';
+        ctx.fillStyle = '#555';
 
         for ( var d = 0; d < dots.length; d++ ) {
             var dot = dots[d];
